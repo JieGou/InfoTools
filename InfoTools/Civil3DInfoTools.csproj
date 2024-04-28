@@ -10,7 +10,7 @@
     <RootNamespace>Civil3DInfoTools</RootNamespace>
     <AssemblyName>Civil3DInfoTools</AssemblyName>
     <!--<ProjectTypeGuids>{60dc8134-eba5-43b8-bcc9-bb4bc16c2548};{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>-->
-    <TargetFrameworkVersion>v4.6</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.8</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <TargetFrameworkProfile />
   </PropertyGroup>
@@ -136,30 +136,31 @@
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="accoremgd">
-      <HintPath>$(AUTOCAD2018)\accoremgd.dll</HintPath>
+      <HintPath>C:\Program Files\Autodesk\AutoCAD 2022\accoremgd.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="acdbmgd">
-      <HintPath>$(AUTOCAD2018)\acdbmgd.dll</HintPath>
+      <HintPath>C:\Program Files\Autodesk\AutoCAD 2022\acdbmgd.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="acdbmgdbrep">
-      <HintPath>$(AUTOCAD2018)\acdbmgdbrep.dll</HintPath>
+      <HintPath>C:\Program Files\Autodesk\AutoCAD 2022\acdbmgdbrep.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="acmgd">
-      <HintPath>$(AUTOCAD2018)\acmgd.dll</HintPath>
+      <HintPath>C:\Program Files\Autodesk\AutoCAD 2022\acmgd.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="AcMPolygonMGD">
-      <HintPath>$(AUTOCAD2018)\AcMPolygonMGD.dll</HintPath>
+      <HintPath>C:\Program Files\Autodesk\AutoCAD 2022\AcMPolygonMGD.dll</HintPath>
+      <Private>False</Private>
     </Reference>
     <Reference Include="AecBaseMgd">
-      <HintPath>$(AUTOCAD2018)\ACA\AecBaseMgd.dll</HintPath>
+      <HintPath>..\packages\chuongmep.civil3d.api.aecbasemgd\2022.0.1\ref\net48\AecBaseMgd.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="AeccDbMgd">
-      <HintPath>$(AUTOCAD2018)\C3D\AeccDbMgd.dll</HintPath>
+      <HintPath>..\packages\chuongmep.civil3d.api.aeccdbmgd\2022.0.1\ref\net48\AeccDbMgd.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="C5, Version=2.5.0.0, Culture=neutral, PublicKeyToken=282361b99ded7e8e, processorArchitecture=MSIL">
@@ -177,7 +178,7 @@
       <HintPath Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">$(SolutionDir)RBush\KnnUtility\Release\KnnUtility.dll</HintPath>
     </Reference>
     <Reference Include="ManagedMapApi">
-      <HintPath>$(AUTOCAD2018)\Map\ManagedMapApi.dll</HintPath>
+      <HintPath>..\packages\ManagedMapApi.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="Microsoft.Expression.Interactions, Version=4.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
