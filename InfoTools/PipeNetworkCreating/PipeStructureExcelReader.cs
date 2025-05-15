@@ -12,12 +12,12 @@ using static Common.ExceptionHandling.ExeptionHandlingProcedures;
 namespace Civil3DInfoTools.PipeNetworkCreating
 {
     /// <summary>
-    /// Предназначен для считывания данных из файлов Excel, описывающих колодцы и присоединенные трубы
+    /// Designed to read data from Excel files describing wells and connected pipes
     /// </summary>
     public class PipeStructureExcelReader
     {
-        //private const int SKIP_ROWS_COUNT = 5;//МОЖЕТ БЫТЬ РАЗНЫМ!!!
-        //считать, что последняя строка шапки таблицы содержит занчения 1, 2, 3, 4...12 и после этой строки идут данные
+        //private const int SKIP_ROWS_COUNT = 5;//MAY BE DIFFERENT!!!
+        //assume that the last row of the table header contains values ​​1, 2, 3, 4...12 and after this row comes the data
         private const int WELL_NUM_COL = 0;
         private const int NETWORK_TYPE_COL = 1;
         private const int SIZE1_COL = 2;
@@ -34,9 +34,9 @@ namespace Civil3DInfoTools.PipeNetworkCreating
 
         public static readonly Regex CONTAINS_NUMBERS = new Regex("^.*[0-9]+.*$");
 
-        public Dictionary<int,//номер квадрата сетки
-            Dictionary<string,//номер колодца (может быть не только цифрой)
-                WellData>>//все данные о колодце и присоединениях к нему
+        public Dictionary<int,//grid square number
+            Dictionary<string,//well number (can be not only a number)
+                WellData>>//all data about the well and its connections
             WellsData
         { get; private set; } = new Dictionary<int, Dictionary<string, WellData>>();
 
@@ -97,7 +97,7 @@ namespace Civil3DInfoTools.PipeNetworkCreating
                         case ".xlsx":
                             reader = ExcelReaderFactory.CreateOpenXmlReader(fs);
                             break;
-                            //TODO?: можно добавить еще CSV
+                            //TODO?: can you add more CSV
                     }
 
                     if (reader != null)
@@ -285,7 +285,9 @@ namespace Civil3DInfoTools.PipeNetworkCreating
 
     }
 
-    //Данные о колодце
+    /// <summary>
+    /// Well data
+    /// </summary>
     public class WellData
     {
         public string Num { get; set; }
@@ -293,7 +295,7 @@ namespace Civil3DInfoTools.PipeNetworkCreating
         public string NetworkType { get; set; }
 
 
-        public string SizeString { get; set; }//иногда в столбце габаритов написано "ковер"
+        public string SizeString { get; set; }//sometimes in the dimensions column it says "carpet"
         public double Size1 { get; set; }
         public double Size2 { get; set; }
 

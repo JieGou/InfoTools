@@ -10,7 +10,7 @@ namespace Civil3DInfoTools.PipeNetworkCreating
     public partial class PipeNetworkGraph
     {
         /// <summary>
-        /// Ребро графа
+        /// The edge of the graph
         /// </summary>
         private class NetworkEdge
         {
@@ -18,19 +18,19 @@ namespace Civil3DInfoTools.PipeNetworkCreating
 
             public NetworkNode EndNode { get; set; }
 
-            //данные из Excel если есть для 1-го присоединения
+            //data from Excel if available for 1st connection
             public PipeJunctionData StartPipeJunctionData { get; set; }
 
-            //данные из Excel если есть для 2-го присоединения
+            //data from Excel if available for 2nd connection
             public PipeJunctionData EndPipeJunctionData { get; set; }
 
-            //точки полилинии
+            //polyline points
             public List<Point2d> PositionList { get; private set; }
 
-            //2d кривая, состоящая из линейных сегментов согласно точкам полилинии 
+            //2d curve consisting of line segments according to the points of a polyline
             public CompositeCurve2d PositionCurve { get; private set; }
 
-            //точки для создания трубопровода
+            //points for creating a pipeline
             public List<XYZ> PipePositionList { get; set; } = new List<XYZ>();
 
             private double pipeHorizontalLength = 0;
@@ -61,7 +61,7 @@ namespace Civil3DInfoTools.PipeNetworkCreating
             }
 
             /// <summary>
-            /// Сращивание двух ребер, стыкующихся в одном узле
+            /// Splicing of two ribs that meet at one node
             /// </summary>
             /// <param name="nn"></param>
             public NetworkEdge(NetworkNode nn/*, Transaction tr, BlockTableRecord ms*/)
@@ -96,7 +96,7 @@ namespace Civil3DInfoTools.PipeNetworkCreating
 
 
 
-                //переназначить ссылки на примыкающие ребра у соседних узлов!
+                //reassign links to adjacent edges in neighboring nodes!
                 StartNode.AttachedEdges.Remove(edge1);
                 StartNode.AttachedEdges.Add(this);
                 EndNode.AttachedEdges.Remove(edge2);
@@ -154,18 +154,18 @@ namespace Civil3DInfoTools.PipeNetworkCreating
 
                     currParam += len;
 
-                    //Если есть точка разбиения в начале и она еще не достигнута
+                    //If there is a split point at the beginning and it has not yet been reached
                     if (startSplitPt != null)
                     {
                         if (startSplitPt.Parameter < currParam)
                         {
-                            //точка разбиения находится на этой кривой. Ее нужно добавить в список
+                            //the split point is on this curve. It needs to be added to the list
                             AddPtToPipePositionList(new XYZ(startSplitPt.Point));
                             startSplitPt = null;
                         }
                         else
                         {
-                            //точка отсечения начала еще не достигнута, переход к следующей кривой
+                            //the cut-off point of the beginning has not yet been reached, moving on to the next curve
                             continue;
                         }
 
@@ -174,7 +174,7 @@ namespace Civil3DInfoTools.PipeNetworkCreating
 
                     if (endSplitPt != null && endSplitPt.Parameter < currParam)
                     {
-                        //точка разбиения находится на этой кривой. Ее нужно добавить в список
+                        //the split point is on this curve. It needs to be added to the list
                         AddPtToPipePositionList(new XYZ(endSplitPt.Point));
                         endSplitPt = null;
                         break;//обход точек заканчивается

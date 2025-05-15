@@ -18,7 +18,7 @@ using Autodesk.Civil.DatabaseServices.Styles;
 
 namespace Civil3DInfoTools.PipeNetworkCreating
 {
-    //TODO: Проверить на пустом чертеже
+    //TODO: Check on a blank drawing
     public partial class PipeNetworkGraph
     {
         private Document doc = null;
@@ -27,31 +27,31 @@ namespace Civil3DInfoTools.PipeNetworkCreating
 
         private string communicationLayerName = "сеть";
 
-        //квадраты сетки
+        //grid squares
         private RBush<GridSquare> gridSquares = new RBush<GridSquare>();
 
-        //положения блоков колодцев (только заданные блоки)
+        //well block positions (only specified blocks)
         private RBush<StructurePosition> structurePositions = new RBush<StructurePosition>();
 
-        //положения блоков колодцев (все блоки в слое колодцев)
+        //well block positions (all blocks in the well layer)
         private RBush<StructurePosition> allStructurePositions = new RBush<StructurePosition>();
 
-        //положения подписей блоков колодцев
+        //positions of well block signatures
         private RBush<TextPosition> structureLabelPositions = new RBush<TextPosition>();
 
-        //положения подписей примыканий к колодцам
+        //positions of the signatures of the adjoining wells
         private RBush<TextPosition> pipeJunctionLabelPositions = new RBush<TextPosition>();
 
-        //узлы графа в RTree
+        //graph nodes in RTree
         private RBush<NetworkNode> networkNodesRbush = new RBush<NetworkNode>();
 
-        //узлы графа в списке
+        //graph nodes in the list
         private List<NetworkNode> networkNodesList = new List<NetworkNode>();
 
-        //ребра графа
+        //edges of the graph
         private List<NetworkEdge> networkEdges = new List<NetworkEdge>();
 
-        //маркеры
+        //markers
         private HashSet<StructurePosition> structuresNearPolylineNotInEndPointToDraw = new HashSet<StructurePosition>();
 
 
@@ -86,11 +86,10 @@ namespace Civil3DInfoTools.PipeNetworkCreating
 
 
         /// <summary>
-        /// Построение графа инженерной сети
-        /// 
+        /// Construction of the engineering network graph 
         /// </summary>
         /// <param name="doc"></param>
-        /// <param name="configsViewModel">обязательно все настройки должны быть назначены</param>
+        /// <param name="configsViewModel">all settings must be assigned</param>
         public PipeNetworkGraph(Document doc, CivilDocument cdoc, ConfigureNetworkCreationViewModel configsViewModel)
         {
             this.doc = doc;
@@ -104,7 +103,7 @@ namespace Civil3DInfoTools.PipeNetworkCreating
 
             using (Transaction tr = db.TransactionManager.StartTransaction())
             {
-                //слои
+                //layers
                 LayerTableRecord gridSquaresLtr
                     = (LayerTableRecord)tr.GetObject(configsViewModel.GridLayerId.Value, OpenMode.ForRead);
                 string gridSquaresLayerName = gridSquaresLtr.Name;
@@ -118,16 +117,16 @@ namespace Civil3DInfoTools.PipeNetworkCreating
                     = (LayerTableRecord)tr.GetObject(configsViewModel.CommunicationLayerId.Value, OpenMode.ForRead);
                 communicationLayerName = communicationLtr.Name;
 
-                //блоки
+                //blocks
                 HashSet<ObjectId> blocks = configsViewModel.Blocks;
 
-                //данные о колодцах
+                //well data
                 Dictionary<int, Dictionary<string, WellData>> wellsData = configsViewModel.ExcelReader?.WellsData;
 
-                //1. Записать квадраты сетки в RTree
-                //загрузка квадратов в RTree
+                //1. Write grid squares to RTree
+                //load squares to RTree
                 {
-                    //Выбрать все полилинии в слое сетки
+                    //Select all polylines in the mesh layer
                     TypedValue[] tv = new TypedValue[]
                                 {
                     new TypedValue(0, "LWPOLYLINE"),
@@ -135,7 +134,7 @@ namespace Civil3DInfoTools.PipeNetworkCreating
                                 };
                     SelectionFilter flt = new SelectionFilter(tv);
                     PromptSelectionResult psr = ed.SelectAll(flt);
-                    //эти полилинии должны представлять собой квадраты
+                    //these polylines should be squares
                     SelectionSet ss = psr.Value;
                     if (ss != null)
                     {
@@ -143,7 +142,7 @@ namespace Civil3DInfoTools.PipeNetworkCreating
                         foreach (SelectedObject so in ss)
                         {
                             Polyline poly = (Polyline)tr.GetObject(so.ObjectId, OpenMode.ForRead);
-                            if (IsSquare(poly))//TODO: А если в этом слое находится какой-то левый квадрат?
+                            if (IsSquare(poly))//TODO: What if there is some left square in this layer?
                             {
                                 Extents3d? ext = poly.Bounds;
                                 if (ext != null)
@@ -152,14 +151,14 @@ namespace Civil3DInfoTools.PipeNetworkCreating
                                 }
                             }
                         }
-                        //загрузить квадраты в RTree
+                        //load squares into RTree
                         gridSquares.BulkLoad(squares);
                     }
 
                 }
-                //присвоение квадратам номеров по текстам, которые попадают в эти квадраты
+                //assigning numbers to squares based on the texts that fall into these squares
                 {
-                    //Выбрать все текстовые объекты в слое сетки
+                    //Select all text objects in the grid layer
                     TypedValue[] tv = new TypedValue[]
                     {
                     new TypedValue(0, "TEXT,MTEXT"),
@@ -167,9 +166,9 @@ namespace Civil3DInfoTools.PipeNetworkCreating
                     };
                     SelectionFilter flt = new SelectionFilter(tv);
                     PromptSelectionResult psr = ed.SelectAll(flt);
-                    //текст должен соответствовать регулярному выражению  
+                    //text must match regular expression
                     Regex regex = PipeStructureExcelReader.SQUARE_LBL_REGEX;
-                    //для каждого текста определить в какой квадрат он попадает
+                    //for each text determine which square it falls into
                     SelectionSet ss = psr.Value;
                     if (ss != null)
                     {
@@ -192,7 +191,7 @@ namespace Civil3DInfoTools.PipeNetworkCreating
                                     IReadOnlyList<GridSquare> squares = gridSquares.Search(queryPt);
                                     if (squares.Count == 1)
                                     {
-                                        //текстовая строка переводится в целое число
+                                        //the text string is converted to an integer
                                         squares.First().SquareKey
                                             = Convert.ToInt32(txtContent.Replace("_", "").Replace("-", "").Replace(" ", ""));
                                     }
@@ -1162,7 +1161,7 @@ namespace Civil3DInfoTools.PipeNetworkCreating
                 {
 
                     //CivilDB.Pipe prevPipe = null;
-                    
+
                     for (int i = 0; i < ne.PipePositionList.Count - 1; i++)
                     {
                         Point3d p0 = ne.PipePositionList[i].GetPt3d() + elevCorrectionVector;
@@ -1203,7 +1202,7 @@ namespace Civil3DInfoTools.PipeNetworkCreating
                             tr.AddNewlyCreatedDBObject(vertex, true);
                         }
                     }
-                        
+
 
 
                 }
@@ -1351,7 +1350,7 @@ namespace Civil3DInfoTools.PipeNetworkCreating
                 TxtId = txtId;
 
 
-                //кривая, описывающая коробку для расчета расстояния до полилинии
+                //curve describing a box for calculating the distance to a polyline
                 Point3d P0 = new Point3d(minPt.X, minPt.Y, 0);
                 Point3d P1 = new Point3d(minPt.X, maxPt.Y, 0);
                 Point3d P2 = new Point3d(maxPt.X, maxPt.Y, 0);
@@ -1409,7 +1408,7 @@ namespace Civil3DInfoTools.PipeNetworkCreating
 
 
         /// <summary>
-        /// Узел графа
+        /// Graph node
         /// </summary>
         private class NetworkNode : ISpatialData
         {
@@ -1419,13 +1418,13 @@ namespace Civil3DInfoTools.PipeNetworkCreating
             public StructurePosition StructureBlock { get; set; } = null;
 
             /// <summary>
-            /// Id колодца
+            /// Well id
             /// </summary>
             public ObjectId StructId { get; set; } = ObjectId.Null;
 
             public double BlockRefRotation { get; set; }
 
-            //данные из Excel если есть
+            //data from Excel if available
             public WellData WellData { get; set; }
 
             public List<NetworkEdge> AttachedEdges { get; set; } = new List<NetworkEdge>();
